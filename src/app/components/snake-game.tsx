@@ -11,6 +11,8 @@ export default function SnakeGame() {
   const [gameOver, setGameOver] = useState(true)
   const [gameRunning, setGameRunning] = useState(false)
   const { account } = useWallet()
+  const [chances, setChances] = useState(3)
+  const [maxScore, setMaxScore] = useState(0)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -70,6 +72,15 @@ export default function SnakeGame() {
       if (checkCollision(newHead)) {
         setGameOver(true)
         setGameRunning(false)
+        setChances((prev) => prev - 1)
+        if (score > maxScore) {
+          setMaxScore(score)
+        }
+        if (chances > 1) {
+          setGameRunning(false)
+        } else {
+          alert(`Game Over! Your max score is ${maxScore}`)
+        }
         return
       }
 
@@ -112,7 +123,6 @@ export default function SnakeGame() {
     const startGame = () => {
       snake = [{ x: 200, y: 200 }]
       direction = { x: 1, y: 0 }
-      setScore(0)
       setGameOver(false)
       setGameRunning(true)
       placeFood()
@@ -130,11 +140,12 @@ export default function SnakeGame() {
       if (gameLoop) clearInterval(gameLoop)
       window.removeEventListener('keydown', handleKeydown)
     }
-  }, [gameOver, gameRunning])
+  }, [gameOver, gameRunning, score, maxScore, chances])
 
   const handleStartRestart = () => {
     setGameRunning(true)
     setGameOver(false)
+    setScore(0) // Reset score only when starting/restarting the game
   }
 
   return (
@@ -150,6 +161,8 @@ export default function SnakeGame() {
         Snake Neon Retro
       </h1>
       <div className="mb-4 font-mono text-xl text-[#00ffcc]">Score: {score}</div>
+      <div className="mb-4 font-mono text-xl text-[#00ffcc]">Max Score: {maxScore}</div>
+      <div className="mb-4 font-mono text-xl text-[#00ffcc]">Chances Remaining: {chances}</div>
       <div className="relative">
         <canvas
           ref={canvasRef}
@@ -162,6 +175,7 @@ export default function SnakeGame() {
         <Button
           onClick={handleStartRestart}
           className="mt-4 bg-[#00ffcc] font-mono text-black hover:bg-[#00ffcc]/90"
+          disabled={chances === 0}
         >
           {gameOver ? 'Restart Game' : gameRunning ? 'eat!' : 'Start Game'}
         </Button>
@@ -171,4 +185,3 @@ export default function SnakeGame() {
     </div>
   )
 }
-
